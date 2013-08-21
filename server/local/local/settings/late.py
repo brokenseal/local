@@ -1,0 +1,5 @@
+from local.settings import DEBUG, ADMINS, PROJECT_ROOT
+
+
+TEMPLATE_DEBUG = DEBUG
+MANAGERS = ADMINS

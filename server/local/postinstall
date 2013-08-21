@@ -1,0 +1,20 @@
+#!/bin/sh
+# DOTCLOUD
+
+alias dj='python manage.py'
+
+dj init createdb
+dj syncdb --noinput
+dj init createusers
+
+dj convert_to_south fatturazione
+dj migrate fatturazione
+
+dj convert_to_south imprese
+dj migrate imprese
+
+dj convert_to_south progetti
+dj migrate progetti
+
+mkdir -p /home/dotcloud/data/media /home/dotcloud/volatile/static
+dj collectstatic --noinput
