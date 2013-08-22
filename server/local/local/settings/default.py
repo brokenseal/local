@@ -85,4 +85,4 @@ LOGGING = {
     }
 }
 
-TORNADIO_PORT = 7100
+IO_PORT = 7100

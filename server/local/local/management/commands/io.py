@@ -1,7 +1,12 @@
 from __future__ import unicode_literals
 
-import tornadio2
+import os
+import urlparse
+from sockjs.tornado import SockJSRouter
+
+import tornadoredis
 from tornado import web
+from tornado import ioloop
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -14,24 +19,19 @@ def on_connected(*args):
 
 
 class Command(BaseCommand):
-    help = 'Run TornadIO2 server'
+    help = 'Run io server'
     args = '[port]'
 
     def handle(self, *args, **options):
-        if args:
-            port = args[0]
-        else:
-            port = settings.TORNADIO_PORT
+        redis_connection_url = os.environ.get('REDISTOGO_URL', os.environ.get('OPENREDIS_URL', 'redis://localhost:6379'))
+        url = urlparse.urlparse(redis_connection_url)
+        pool = tornadoredis.ConnectionPool(host=url.hostname, port=url.port)
+        redis_connection = tornadoredis.Client(connection_pool=pool, password=url.password)
+        redis_connection.connect()
+        redis_connection.psubscribe("*", lambda msg: redis_connection.listen(connections.Connection.pubsub_message))
 
-        router = tornadio2.TornadioRouter(connections.MainConnection)
-        application = web.Application(
-            router.urls,
-            default_host="0.0.0.0",
-            socket_io_port=port,
-        )
-
-        io_server = tornadio2.SocketServer(application, auto_start=False)
-        io_server.io_loop.add_timeout(100, connections.BaseConnectionMetaClass.setup_connections(io_server.io_loop))
-
-        # start the io loop
-        io_server.io_loop.start()
+        # Disable websockets for heroku
+        router = SockJSRouter(connections.Connection, '/chat', dict(disabled_transports=['websocket']))
+        app = web.Application(router.urls)
+        app.listen(os.environ.get("PORT", 8080))
+        ioloop.IOLoop.instance().start()

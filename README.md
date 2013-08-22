@@ -11,4 +11,4 @@ A working chat client/server implementation based on:
   - RabbitMQ
 
 
-This is not a finished work and it will be refactored to work with SockJS and sockjs-tornado
+Loa
