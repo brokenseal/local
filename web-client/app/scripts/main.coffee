@@ -56,5 +56,7 @@ require([
     'angular_socket_io'
     'scripts/app'
 ], (ng, io, ng_socket_io, app)->
-    ng.bootstrap(document, [app['name']])
+    setTimeout(->
+        ng.bootstrap(document, [app['name']])
+    , 3000)
 )

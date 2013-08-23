@@ -1,13 +1,13 @@
 define([
     'uuid'
     'angular'
-    'scripts/io'
-], (uuid, ng, io)->
+    'scripts/socket'
+], (uuid, ng, socket)->
     return ng.module('local.services', []).factory({
         MessageService: ($rootScope)->
             messages = []
 
-            io.chat.on('message:created', (newMessage, clientId)->
+            socket.chat.on('message:created', (newMessage, clientId)->
                 $rootScope.$apply(->
                     found = false
 
@@ -22,7 +22,7 @@ define([
                 )
             )
 
-            io.chat.on('error', ->
+            socket.chat.on('error', ->
                 $rootScope.$apply(->
                     for message in messages
                         if message.needsConfirm
@@ -30,7 +30,7 @@ define([
                 )
             )
 
-            io.chat.on('bootstrap', (messageList)->
+            socket.chat.on('bootstrap', (messageList)->
                 $rootScope.$apply(->
                     for message in messageList
                         messages.push(message)
@@ -43,13 +43,13 @@ define([
 
                 createMessage: (messageObject)->
                     messageObject.needsConfirm = true
-                    messageObject.clientId = uuid()
+                    messageObject.client_id = uuid()
 
                     messages.push(messageObject)
-                    io.chat.emit('message:create', messageObject)
+                    socket.chat.emit('message:create', messageObject)
 
                 bootstrap: ->
-                    io.chat.emit('bootstrap')
+                    socket.chat.emit('bootstrap')
             }
     })
 )
