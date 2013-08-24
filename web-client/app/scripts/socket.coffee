@@ -2,13 +2,14 @@ define([
     'io'
     'scripts/settings'
 ], (io, settings)->
-    socket = new SockJS(settings.getBaseUrl())
+    socket = new SockJS(settings.getBaseUrl() + 'chat')
     onEventCallbacks = {}
-    socket.onmessage = (message)->
-        event = JSON.parse(message)
+#    socket.onopen = ()->
+#        console.log("onopen")
 
-        if event.name in onEventCallbacks
-            onEventCallbacks[event.name](event.data)
+    socket.onmessage = (message)->
+        if message.data.name of onEventCallbacks
+            onEventCallbacks[message.data.name](message.data.data)
 
     return {
         chat: {

@@ -7,18 +7,18 @@ define([
         MessageService: ($rootScope)->
             messages = []
 
-            socket.chat.on('message:created', (newMessage, clientId)->
+            socket.chat.on('message:created', (data)->
                 $rootScope.$apply(->
                     found = false
 
                     for message in messages
-                        if message.clientId == clientId
+                        if message.client_id == data.client_id
                             message.needsConfirm = false
                             found = true
                             break
 
                     if not found
-                        messages.push(newMessage)
+                        messages.push(data.message)
                 )
             )
 
@@ -30,7 +30,7 @@ define([
                 )
             )
 
-            socket.chat.on('bootstrap', (messageList)->
+            socket.chat.on('message:list', (messageList)->
                 $rootScope.$apply(->
                     for message in messageList
                         messages.push(message)

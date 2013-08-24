@@ -49,7 +49,7 @@ def authentication_authenticate(connection, token, salt):
 
 
 @event
-def message_create(connection, author, text, client_id):
+def message_create(connection, author, text, client_id, **kwargs):
         new_message = models.Message.objects.create(
             author=author,
             text=text,
@@ -64,8 +64,5 @@ def message_create(connection, author, text, client_id):
         )
 
 @event
-def bootstrap(connection, data):
-    return dict(
-        name="message:list",
-        data=list(models.Message.objects.as_dicts()),
-    )
+def bootstrap(connection):
+    connection.emit(name="message:list", data=list(models.Message.objects.as_dicts()))

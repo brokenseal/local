@@ -85,5 +85,5 @@ LOGGING = {
     }
 }
 
-IO_PORT = 7100
+IO_PORT = 7000
 CHANNEL_MAX_AGE = 10

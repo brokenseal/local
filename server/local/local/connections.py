@@ -30,8 +30,8 @@ class MainConnection(SockJSConnection):
         event = json.loads(unicode(message.body))
 
         for client in cls.active_connections:
-            if client.is_authenticated and client.channel == message.channel:
-                client.emit(event.name, **event.data)
+#            if client.is_authenticated and client.channel == message.channel:
+            client.emit(**event)
 
     def __init__(self, *args, **kwargs):
         # instance properties, set during authentication
@@ -46,9 +46,6 @@ class MainConnection(SockJSConnection):
         Sends a message to the client
         If the passed in message is dictionary, it dumps it first and then pass it along
         """
-        if isinstance(message, dict):
-            message = json.dumps(message)
-
         return super(MainConnection, self).send(message, binary)
 
     def on_open(self, request):
@@ -56,7 +53,7 @@ class MainConnection(SockJSConnection):
         Callback fired when a new client connects for the first time
         Request the client to authenticate and add them to client pool.
         """
-        self.emit('authentication:request')
+        self.emit(name='authentication:request')
         self.active_connections.add(self)
         self.redis_client = redis.Redis()
 
@@ -68,19 +65,25 @@ class MainConnection(SockJSConnection):
         try:
             message = json.loads(message)
         except ValueError:
-            return self.emit('error', error=dict(
-                name='ValueError',
-                message='Failed to load message',
+            return self.emit(dict(
+                name='error',
+                data=dict(
+                    name='ValueError',
+                    message='Failed to load message',
+                )
             ))
 
-        if not settings.DEBUG and not self.is_authenticated and not message.name == 'authentication:request':
+        if not settings.DEBUG and not self.is_authenticated and not message['name'] == 'authentication:request':
             # the very first message needs to be the authentication request, otherwise this is an unauthorized request
-            return self.emit('error', error=dict(
-                name='NotAllowed',
-                message='Client is not authenticated',
+            return self.emit(dict(
+                name='error',
+                data=dict(
+                    name='NotAllowed',
+                    message='Client is not authenticated',
+                )
             ))
 
-        return self.on_event(message['name'], **message.data)
+        return self.on_event(message['name'], message.get('data', {}))
 
     def on_close(self):
         """
@@ -92,33 +95,30 @@ class MainConnection(SockJSConnection):
         return super(MainConnection, self).on_close()
 
     ### custom connection methods mainly used to handle socket.io like events style
-    def emit(self, name, **kwargs):
+    def emit(self, **kwargs):
         """
         Standard format for all messages
         """
-        return self.send(dict(
-            name=name,
-            data=kwargs,
-        ))
+        return self.send(kwargs)
 
-    def broadcast_event(self, name, **kwargs):
-        self.redis_client.publish('chat', json.dumps(dict(
-            name=name,
-            data=kwargs,
-        )))
+    def broadcast_event(self, **kwargs):
+        self.redis_client.publish('chat', json.dumps(kwargs))
 
-    def on_event(self, name, **kwargs):
+    def on_event(self, name, data):
         if name not in messages.routing:
-            return self.emit('error', dict(
-                name='UnknownEvent',
-                message='Unknown event `{}`'.format(name),
+            return self.emit(dict(
+                name='error',
+                data=dict(
+                    name='UnknownEvent',
+                    message='Unknown event `{}`'.format(name),
+                ),
             ))
 
         event_handler = messages.resolve(name)
-        result = event_handler(self, **kwargs)
+        result = event_handler(self, **data)
 
         if result is not None:
-            # automatically broadcast a new message if the event handler returns a value
+            # automatically broadcast a new message if the event handler returns a dictionary
             return self.broadcast_event(**result)
 
     @property

@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import os
+import tornado
 import urlparse
 from sockjs.tornado import SockJSRouter
 
@@ -34,7 +35,7 @@ class Command(BaseCommand):
         # enable sockjs routing
         router = SockJSRouter(
             connections.MainConnection,
-            '/info',
+            '/chat',
             dict(disabled_transports=DISABLED_TRANSPORTS),
         )
         app = web.Application(router.urls)
