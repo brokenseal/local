@@ -7,6 +7,12 @@ define([
 #    socket.onopen = ()->
 #        console.log("onopen")
 
+#    socket.onerror = ()->
+#        console.log("onopen")
+
+#    socket.onclose = ()->
+#        console.log("onopen")
+
     socket.onmessage = (message)->
         if message.data.name of onEventCallbacks
             onEventCallbacks[message.data.name](message.data.data)

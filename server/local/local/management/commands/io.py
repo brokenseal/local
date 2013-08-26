@@ -38,6 +38,9 @@ class Command(BaseCommand):
             '/chat',
             dict(disabled_transports=DISABLED_TRANSPORTS),
         )
-        app = web.Application(router.urls)
+        app = web.Application(
+            router.urls,
+            "0.0.0.0",
+        )
         app.listen(IO_PORT)
         ioloop.IOLoop.instance().start()

@@ -59,6 +59,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     'local',
+    'django_extensions',
 )
 
 LOGGING = {
