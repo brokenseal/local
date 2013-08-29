@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 import os
-import tornado
+import sys
 import urlparse
 from sockjs.tornado import SockJSRouter
 
@@ -29,6 +29,7 @@ class Command(BaseCommand):
         pool = tornadoredis.ConnectionPool(host=url.hostname, port=url.port)
         redis_connection = tornadoredis.Client(connection_pool=pool, password=url.password)
         redis_connection.connect()
+        sys.stdout.write("Connected to Redis ({})".format(url))
         redis_connection.psubscribe("*",
                                     lambda message: redis_connection.listen(connections.MainConnection.pubsub_message))
 
@@ -43,4 +44,7 @@ class Command(BaseCommand):
             "0.0.0.0",
         )
         app.listen(IO_PORT)
+        sys.stdout.write("App listening at port {}".format(IO_PORT))
+        sys.stdout.flush()
+        sys.stdout.flush()
         ioloop.IOLoop.instance().start()
