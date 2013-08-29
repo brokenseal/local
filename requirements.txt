@@ -1,3 +1,4 @@
 Django==1.5
 bpython
-sockjs-tornado
+sockjs-tornado==1.0.0
+tornadoredis==2.4.5
