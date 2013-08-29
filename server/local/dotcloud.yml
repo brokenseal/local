@@ -1,8 +1,0 @@
-# OPENSHIFT
-
-www:
-  type: python
-db:
-  type: postgresql
-cache:
-  type: redis

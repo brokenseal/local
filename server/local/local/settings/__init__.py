@@ -5,6 +5,8 @@ fill those roles.
 
 You can get your hostname by typing `hostname` into a terminal.
 """
+from __future__ import unicode_literals
+
 import re
 import os
 import sys
@@ -63,13 +65,13 @@ HOSTMAP = (
 #########################################
 # ENVIRONMENT VARIABLE BASED SETTINGS   #
 #########################################
-if os.environ.get('ON_HEROKU', False):
+if 'ON_HEROKU' in os.environ:
     to_load.append('heroku')
 
-if os.environ.has_key('OPENSHIFT_REPO_DIR'):
+if 'OPENSHIFT_REPO_DIR' in os.environ:
     to_load.append('openshift')
 
-if os.environ.has_key('TRAVIS_PYTHON_VERSION'):
+if 'TRAVIS_PYTHON_VERSION' in os.environ:
     to_load.append('development')
 
 # retrieve all the settings based on the hostmap
