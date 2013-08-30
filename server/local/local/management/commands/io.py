@@ -46,5 +46,4 @@ class Command(BaseCommand):
         app.listen(IO_PORT)
         sys.stdout.write("App listening at port {}".format(IO_PORT))
         sys.stdout.flush()
-        sys.stdout.flush()
         ioloop.IOLoop.instance().start()
