@@ -3,11 +3,11 @@ from __future__ import unicode_literals
 import os
 import sys
 import urlparse
-from sockjs.tornado import SockJSRouter
 
 import tornadoredis
 from tornado import web
 from tornado import ioloop
+from sockjs.tornado import SockJSRouter
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -16,9 +16,6 @@ from local import connections
 
 DISABLED_TRANSPORTS = getattr(settings, 'DISABLED_TRANSPORTS', [])
 IO_PORT = os.environ.get("PORT", settings.IO_PORT)
-
-sys.stdout.write(settings.REDIS_URL)
-sys.stdout.flush()
 
 
 class Command(BaseCommand):
@@ -31,7 +28,7 @@ class Command(BaseCommand):
         pool = tornadoredis.ConnectionPool(host=url.hostname, port=url.port)
         redis_connection = tornadoredis.Client(connection_pool=pool, password=url.password)
         redis_connection.connect()
-        sys.stdout.write("Connected to Redis ({})".format(url))
+        sys.stdout.write("\nConnected to Redis ({}) \n".format(url))
         redis_connection.psubscribe("*",
                                     lambda message: redis_connection.listen(connections.MainConnection.pubsub_message))
 
@@ -46,6 +43,6 @@ class Command(BaseCommand):
             "0.0.0.0",
         )
         app.listen(IO_PORT)
-        sys.stdout.write("App listening at port {}".format(IO_PORT))
+        sys.stdout.write("\nApp listening at port {}\n".format(IO_PORT))
         sys.stdout.flush()
         ioloop.IOLoop.instance().start()

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import urlparse
 import redis
 
 from sockjs.tornado import SockJSConnection
@@ -55,7 +56,12 @@ class MainConnection(SockJSConnection):
         """
         self.emit(name='authentication:request')
         self.active_connections.add(self)
-        self.redis_client = redis.Redis()
+
+        url = urlparse.urlparse(settings.REDIS_URL)
+        self.redis_client = redis.Redis(
+            host=url.hostname,
+            port=url.port,
+        )
 
     def on_message(self, message):
         """

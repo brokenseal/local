@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-import os
-
 from local.settings import PROJECT_ROOT
 
 DEBUG = True
