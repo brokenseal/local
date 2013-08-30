@@ -5,3 +5,4 @@ tornado-redis==2.4.5
 redis==2.8.0
 django-extensions==1.1.0
 dj-database-url==0.2.2
+psycopg2==2.5.1
