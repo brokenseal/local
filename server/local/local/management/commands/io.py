@@ -17,6 +17,9 @@ from local import connections
 DISABLED_TRANSPORTS = getattr(settings, 'DISABLED_TRANSPORTS', [])
 IO_PORT = os.environ.get("PORT", settings.IO_PORT)
 
+sys.stdout.write(settings.REDIS_URL)
+sys.stdout.flush()
+
 
 class Command(BaseCommand):
     help = 'Run io server'
