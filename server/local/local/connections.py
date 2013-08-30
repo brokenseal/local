@@ -56,12 +56,8 @@ class MainConnection(SockJSConnection):
         """
         self.emit(name='authentication:request')
         self.active_connections.add(self)
-
-        url = urlparse.urlparse(settings.REDIS_URL)
-        self.redis_client = redis.Redis(
-            host=url.hostname,
-            port=url.port,
-        )
+        
+        self.redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
     def on_message(self, message):
         """
