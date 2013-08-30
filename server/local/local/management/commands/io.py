@@ -14,7 +14,6 @@ from django.core.management.base import BaseCommand
 
 from local import connections
 
-REDIS_CONNECTION_URL = os.environ.get('REDISTOGO_URL', os.environ.get('OPENREDIS_URL', settings.REDIS_URL))
 DISABLED_TRANSPORTS = getattr(settings, 'DISABLED_TRANSPORTS', [])
 IO_PORT = os.environ.get("PORT", settings.IO_PORT)
 
@@ -25,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # connect to redis
-        url = urlparse.urlparse(REDIS_CONNECTION_URL)
+        url = urlparse.urlparse(settings.REDIS_URL)
         pool = tornadoredis.ConnectionPool(host=url.hostname, port=url.port)
         redis_connection = tornadoredis.Client(connection_pool=pool, password=url.password)
         redis_connection.connect()
