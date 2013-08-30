@@ -1,5 +1,6 @@
 import os
 
+DEBUG = True
 CHANNEL_MAX_AGE = 40
 DISABLED_TRANSPORTS = ['websocket']
 
