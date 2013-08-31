@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import sys
+import uuid
 import json
 import redis
 import logging
@@ -38,6 +40,7 @@ class MainConnection(SockJSConnection):
         # instance properties, set during authentication
         self.channel = None
         self.redis_client = None
+        self.id = uuid.uuid4()
 
         super(MainConnection, self).__init__(*args, **kwargs)
 
@@ -83,6 +86,7 @@ class MainConnection(SockJSConnection):
             self.on_event(message['name'], message.get('data', {}))
         except Exception as e:
             self.handle_error(e)
+            sys.stderr.write(e.message)
 
     def handle_error(self, exception):
         self.emit(

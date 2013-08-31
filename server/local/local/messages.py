@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import logging
 
+import pymongo
+
 from django.core import signing
 from django.conf import settings
 
@@ -30,6 +32,10 @@ def event(message_or_func):
     return _wrapper
 
 
+def _get_messages_table():
+    return pymongo.MongoClient(settings.MONGO_DB_URL).mongodb.default.messages
+
+
 @event
 def authentication_authenticate(connection, token, salt):
     try:
@@ -50,19 +56,21 @@ def authentication_authenticate(connection, token, salt):
 
 @event
 def message_create(connection, author, text, client_id, **kwargs):
-        new_message = models.Message.objects.create(
-            author=author,
-            text=text,
-        )
+    messages = _get_messages_table()
+    message_id = messages.insert(dict(
+        author=author,
+        text=text,
+    ))
+    new_message = messages.find_one(dict(_id=message_id))
 
-        return dict(
-            name='message:created',
-            data=dict(
-                message=new_message.as_dict(),
-                client_id=client_id,
-            )
+    return dict(
+        name='message:created',
+        data=dict(
+            message=new_message,
+            client_id=client_id,
         )
+    )
 
 @event
 def bootstrap(connection):
-    connection.emit(name="message:list", data=list(models.Message.objects.as_dicts()))
+    connection.emit(name="message:list", data=list(_get_messages_table().find()))

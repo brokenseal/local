@@ -19,3 +19,5 @@ for _redis_url in ('REDISCLOUD_URL', 'REDISTOGO_URL', 'OPENREDIS_URL'):
         break
 
 assert REDIS_URL is not None, "Redis not installed"
+
+MONGO_DB_URL = os.environ['MONGOLAB_URI']
