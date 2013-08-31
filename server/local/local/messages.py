@@ -5,7 +5,7 @@ import logging
 from django.core import signing
 from django.conf import settings
 
-from . import models
+from . import models, exceptions
 
 SECRET_KEY = "test"
 
@@ -39,9 +39,9 @@ def authentication_authenticate(connection, token, salt):
             salt=salt,
             max_age=settings.CHANNEL_MAX_AGE,
         )
-    except (signing.BadSignature, KeyError) as e:
+    except (signing.BadSignature, KeyError):
         logging.debug('Authentication error: invalid token')
-        connection.emit('error', name='AuthenticationError', message='Invalid token')
+        raise exceptions.AuthenticationError('Invalid token')
     else:
         connection.channel = channel
         logging.debug('Authentication successful')

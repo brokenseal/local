@@ -1,15 +1,15 @@
 from __future__ import unicode_literals
 
 import json
-import logging
-import urlparse
 import redis
+import logging
 
 from sockjs.tornado import SockJSConnection
 
 from django.conf import settings
 
 from . import messages
+from . import exceptions
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ class MainConnection(SockJSConnection):
         """
         self.emit(name='authentication:request')
         self.active_connections.add(self)
-        
+
         self.redis_client = redis.Redis.from_url(settings.REDIS_URL)
 
     def on_message(self, message):
@@ -77,15 +77,21 @@ class MainConnection(SockJSConnection):
 
         if not settings.DEBUG and not self.is_authenticated and not message['name'] == 'authentication:request':
             # the very first message needs to be the authentication request, otherwise this is an unauthorized request
-            return self.emit(dict(
-                name='error',
-                data=dict(
-                    name='NotAllowed',
-                    message='Client is not authenticated',
-                )
-            ))
+            self.handle_error(exceptions.NotAllowed('Client is not authenticated'))
 
-        return self.on_event(message['name'], message.get('data', {}))
+        try:
+            self.on_event(message['name'], message.get('data', {}))
+        except Exception as e:
+            self.handle_error(e)
+
+    def handle_error(self, exception):
+        self.emit(
+            name='error',
+            data=dict(
+                name=exception.__class__.__name__,
+                message=exception.message,
+            )
+        )
 
     def on_close(self):
         """
